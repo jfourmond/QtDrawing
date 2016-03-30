@@ -1,0 +1,22 @@
+Rectangle(10,15,20,25) { rouge, 5, plein, 90°, 50% }
+
+CERCLE(1,1,50) {
+	couleur = vert
+	rotation = 50°
+	remplissage = vide
+	epaisseur = 3
+	opacite = 90%
+}
+
+ligNe l1(1,1,50,50)
+
+l1[epaisseur] = 4
+l1[couleur] = #0,0,255
+
+\*
+	Ceci est un commentaire et doit etre ignore par le parser
+*\
+
+Rectangle r2(160, 160, 10, 10)
+
+r2[couleur] = l1[couleur]

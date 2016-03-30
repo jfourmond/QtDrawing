@@ -1,0 +1,472 @@
+%{
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <iostream>
+	#include <utility>
+	#include <QtGui>
+	#include <QApplication>
+	
+	#include "cercle.h"
+	#include "figure.h"
+	#include "ligne.h"
+	#include "monDessin.h"
+	#include "rectangle.h"
+	#include	"remplissage.h"
+
+	#define YYERROR_VERBOSE
+	#define USE(VALUE) 		/*empty*/
+
+	extern "C" int yyparse (void);
+	extern "C" int yylex(void);
+	extern "C" void yyerror(const std::string&);
+	extern FILE* yyin;
+	extern int yylineno;  
+
+	QPointer<monDessin> D;
+
+	std::string variable;
+
+	QColor color(0,0,0);
+	Filling filling = vide;
+	int opacity = 100;
+	int rotation = 0;
+	int thickness = 1;
+	
+	int errors = 0;
+	
+	// Vector de paramètres
+	std::vector<int> parameters;
+	
+	// map < Variable, Index_Figure dans le vector >
+	std::map<std::string, int> variables;
+	
+	// vector< Figure * >
+	std::vector<Figure *> figures;
+	
+	// LA fenêtre
+	int window_height = 300;
+	int window_width = 400;
+	QColor window_color(255,255,255);
+	
+	
+	/**	Réinitialise les variables du programme	**/
+	static void resetEverything() {
+		parameters.clear();
+	
+		variable.erase();
+	
+		color.setRgb(0,0,0);
+		filling = vide;
+		opacity = 100;
+		rotation = 0;
+		thickness = 1;
+		
+		errors = 0;
+	}
+	
+	/**	Ajoute le paramètre param à la liste des paramètres	**/
+	static void addParameter(int param) {
+		parameters.push_back(param);
+	}
+	
+	/**	Ajoute la figure F à la liste des figures 								**/
+	/**	Associe la variable var à l'indice de la figure dans le vecteur	**/
+	static void addFigure(std::string var, Figure * F) {
+		if(!var.empty()) {
+			std::pair<std::string, int> p(var, figures.size());
+			variables.insert(p);
+		}
+		
+		figures.push_back(F);
+		
+		variable.erase();
+	}
+	
+	/**	Edite le nom de variable courante en fonction de la chaîne **/
+	static void setVariable(char * s) {
+		variable = s;
+	}
+	
+	/**	Edite la variable color	en fonction de la chaîne **/
+	static void setColor(char * s) {
+		if(strcmp(s, "blanc") == 0) 		color.setRgb(255, 255, 255);
+		else if(strcmp(s, "bleu") == 0)	color.setRgb(0, 0, 255);
+		else if(strcmp(s, "gris") == 0) 	color.setRgb(128, 128, 128);
+		else if(strcmp(s, "jaune") == 0)	color.setRgb(255, 255, 0);
+		else if(strcmp(s, "noir") == 0)	color.setRgb(0, 0, 0);
+		else if(strcmp(s, "rouge") == 0)	color.setRgb(255, 0, 0);
+		else if(strcmp(s, "vert") == 0)	color.setRgb(0, 255, 0);
+	}
+	
+	/**	Edite la variable color en fonction de la valeur entière de rouge, vert et bleu	**/
+	static void setColor(int R, int G, int B) {
+		color.setRgb(R,G,B);
+	}
+	
+	/**	Edite la couleur de la variable s	**/
+	static void setColor(char * s, char * var) {
+		auto it = variables.find(var);
+		if(it != variables.end()) {
+			setColor(s);
+			int i = it->second;
+			figures[i]->set_color(color);
+		}
+	}
+	
+	/**	Edite la couleur de la variable s (r, g, b)	**/
+	static void setColor(int r, int g, int b, char * var) {
+		auto it = variables.find(var);
+		if(it != variables.end()) {
+			setColor(r,g,b);
+			int i = it->second;
+			figures[i]->set_color(color);
+		}
+	}
+	
+	/**	Edite la variable filling en fonction de la chaîne **/
+	static void setFilling(char * s) {
+		if(strcmp(s, "plein") == 0)		filling = plein;
+		else if(strcmp(s, "vide") == 0)	filling = vide;
+	}
+	
+	/**	Edite le remplissage de la variable s	**/
+	static void setFilling(char * s, char * var) {
+		auto it = variables.find(var);
+		if(it != variables.end()) {
+			setFilling(s);
+			int i = it->second;
+			figures[i]->set_filling(filling);
+		}
+	}
+	
+	/**	Edite la variable opacity par l'entier **/
+	static void setOpacity(int n) {
+		opacity = n;
+	} 
+	
+	/**	Edite l'opacité de la variable s	**/
+	static void setOpacity(int n, char * var) {
+		auto it = variables.find(var);
+		if(it != variables.end()) {
+			setOpacity(n);
+			int i = it->second;
+			figures[i]->set_opacity(opacity);
+		}
+	}
+	
+	/**	Edite la variable rotation par l'entier **/
+	static void setRotation(int n) {
+		rotation = n;
+	}
+	
+	/**	Edite la rotation de la variable s **/
+	static void setRotation(int n, char * var) {
+		auto it = variables.find(var);
+		if(it != variables.end()) {
+			setRotation(n);
+			int i = it->second;
+			figures[i]->set_rotation(rotation);
+		}
+	}
+	
+	/**	Edite la variable thickness par l'entier **/
+	static void setThickness(int n) {
+		thickness = n;
+	}
+	
+	/**	Edite l'épaisseur de la variable s	**/
+	static void setThickness(int n, char * var) {
+		auto it = variables.find(var);
+		if(it != variables.end()) {
+			setThickness(n);
+			int i = it->second;
+			figures[i]->set_thickness(n);
+		}
+	}
+	
+	/**	Edite la hauteur de la Fenetre	**/
+	static void setWindowHeight(int n) {
+		window_height = n;
+	}
+	
+	/**	Edite la largeur de la Fenetre	**/
+	static void setWindowWidth(int n) {
+		window_width = n;
+	}
+	
+	/**	Edite la couleur de la Fenetre	**/
+	static void setWindowColor(char * c) {
+		setColor(c);
+		window_color = color;
+	}
+	
+	/**	Edite la couleur de la Fenetre (RGB)	**/
+	static void setWindowColor(int r, int g, int b) {
+		setColor(r,g,b);
+		window_color = color;
+	}
+	
+	/**	Crée un cercle à partir des paramètres présents dans le vecteur de paramètre **/
+	static void computeCercle() {
+		if(!(parameters.size() == 3) && (errors != 0)) {
+			yyerror("Paramètres incorrects (Cercle)");
+			resetEverything();
+		} else {
+			//	Options
+			int x = parameters.back();	parameters.pop_back();
+			int y = parameters.back();	parameters.pop_back();
+			int radius = parameters.back();	parameters.pop_back();
+			Cercle * C = new Cercle(x, y, radius);
+			//	Caractéristiques
+			C->set_color(color);				// Couleur
+			C->set_filling(filling);		//	Remplissage
+			C->set_opacity(opacity);		// Opacité
+			C->set_rotation(rotation);		// Rotation
+			C->set_thickness(thickness);	//	Epaisseur
+			addFigure(variable, C);
+		}
+	}
+	
+	/**	Crée un rectangle à partir des paramètres présents dans le vecteur de paramètre **/
+	static void computeRectangle() {
+		if(!(parameters.size() == 4) && (errors != 0)) {
+			yyerror("Paramètres incorrects (Rectangle)");
+			resetEverything();
+		} else {
+			//	Options
+			int x = parameters.back();	parameters.pop_back();
+			int y = parameters.back();	parameters.pop_back();
+			int length = parameters.back();	parameters.pop_back();
+			int width = parameters.back();	parameters.pop_back();
+			Rectangle * R = new Rectangle(x, y, length, width);
+			//	Caractéristiques
+			R->set_color(color);				// Couleur
+			R->set_filling(filling);		//	Remplissage
+			R->set_opacity(opacity);		// Opacité
+			R->set_rotation(rotation);		// Rotation
+			R->set_thickness(thickness);	//	Epaisseur
+			addFigure(variable, R);
+		}
+	}
+	
+	/** Crée une ligne à partir des paramètres présents dans le vecteur de paramètres **/
+	static void computeLigne() {
+		if(!(parameters.size() == 4) && (errors != 0)) {
+			yyerror("Paramètres incorrects (Ligne)");
+			resetEverything();
+		} else {
+			//	Options
+			int x = parameters.back();	parameters.pop_back();
+			int y = parameters.back();	parameters.pop_back();
+			int x_end = parameters.back();	parameters.pop_back();
+			int y_end = parameters.back();	parameters.pop_back();
+			Ligne * L = new Ligne(x, y, x_end, y_end);
+			//	Caractéristiques
+			L->set_color(color);				// Couleur
+			L->set_filling(filling);		//	Remplissage
+			L->set_opacity(opacity);		// Opacité
+			L->set_rotation(rotation);		// Rotation
+			L->set_thickness(thickness);	//	Epaisseur
+			addFigure(variable, L);
+		}
+	}
+	
+	/**	Teste si la chaîne de caractères s représente une variable dans la base	**/
+	static bool isVariable(char * s) {
+		auto it = variables.find(s);
+		return (it != variables.end());
+	}
+
+%}
+
+	%union{
+		int value;
+		char * string;
+	}
+
+	%token CERCLE RECTANGLE LIGNE	FENETRE
+	%token <string> VARIABLE
+	%token <string> COULEUR
+	%token <string> REMPLISSAGE
+	%token <value> NOMBRE
+	%token <string> MOT
+	%token EGAL DEGRE POURCENTAGE
+	%token VIRGULE MOT_DIESE
+	%token PARENTHESE_OUVRANTE PARENTHESE_FERMANTE
+	%token ACCOLADE_OUVRANTE ACCOLADE_FERMANTE
+	%token CROCHET_OUVRANT CROCHET_FERMANT
+	%token END
+	
+	%left CERCLE RECTANGLE LIGNE
+
+	%start Input
+
+%%
+
+Input:
+	/*	Vide	*/
+	|	Input Line
+	;
+
+Line:
+		Figure { }
+	|	Affectation	{ }
+	|	Fenetre { }
+	|	END {	return 0; }
+	;
+
+Figure:
+		CERCLE 		Details	{ computeCercle(); }
+	|	RECTANGLE	Details	{ computeRectangle(); }
+	|	LIGNE			Details	{ computeLigne(); }
+	;
+
+Affectation:
+		VARIABLE CROCHET_OUVRANT MOT CROCHET_FERMANT EGAL COULEUR	{
+			if(isVariable($1)) {
+				if(strcmp($3, "couleur") != 0) yyerror("Paramètre invalide(Couleur)");
+				else setColor($6, $1);				
+			} else {
+				yyerror("Variable non définie");
+			}
+		}
+	|	VARIABLE CROCHET_OUVRANT MOT CROCHET_FERMANT EGAL MOT_DIESE NOMBRE VIRGULE NOMBRE VIRGULE NOMBRE {
+			if(isVariable($1)) {
+				if(strcmp($3, "couleur") != 0) yyerror("Paramètre invalide(Couleur RGB)");
+				else setColor($7, $9, $11, $1);				
+			} else {
+				yyerror("Variable non définie");
+			}
+		}
+	|	VARIABLE CROCHET_OUVRANT MOT CROCHET_FERMANT EGAL REMPLISSAGE	{
+			if(isVariable($1)) {
+				if(strcmp($3, "remplissage") != 0) yyerror("Paramètre invalide(Remplissage)");
+				else setFilling($6, $1);				
+			} else {
+				yyerror("Variable non définie");
+			}
+		}
+	|	VARIABLE CROCHET_OUVRANT MOT CROCHET_FERMANT EGAL NOMBRE POURCENTAGE	{
+			if(isVariable($1)) {
+				if(strcmp($3, "opacite") != 0) yyerror("Paramètre invalide(Opacite)");
+				else setOpacity($6, $1);				
+			} else {
+				yyerror("Variable non définie");
+			}
+		}
+	| VARIABLE CROCHET_OUVRANT MOT CROCHET_FERMANT EGAL NOMBRE DEGRE	{
+			if(isVariable($1)) {
+				if(strcmp($3, "rotation") != 0) yyerror("Paramètre invalide(Rotation)");
+				else setRotation($6, $1);				
+			} else {
+				yyerror("Variable non définie");
+			}
+		}
+	|	VARIABLE CROCHET_OUVRANT MOT CROCHET_FERMANT EGAL NOMBRE	{
+			if(isVariable($1)) {
+				if(strcmp($3, "epaisseur") != 0) yyerror("Paramètre invalide(Epaisseur)");
+				else setThickness($6, $1);				
+			} else {
+				yyerror("Variable non définie");
+			}
+		}
+	;
+
+Fenetre:
+		FENETRE CROCHET_OUVRANT MOT CROCHET_FERMANT EGAL COULEUR {
+			if(strcmp($3, "couleur") != 0) yyerror("Paramètre invalide(Couleur Fenêtre)");
+			else setWindowColor($6);			
+		}
+	|	FENETRE CROCHET_OUVRANT MOT CROCHET_FERMANT EGAL MOT_DIESE NOMBRE VIRGULE NOMBRE VIRGULE NOMBRE  {
+			if(strcmp($3, "couleur") != 0) yyerror("Paramètre invalide(Couleur Fenêtre RGB)");
+			else setWindowColor($7, $9, $11);			
+		}
+	|	FENETRE CROCHET_OUVRANT MOT CROCHET_FERMANT EGAL NOMBRE {
+			if(strcmp($3, "largeur") == 0) setWindowWidth($6);
+			else if(strcmp($3, "hauteur") == 0) setWindowHeight($6);
+			else yyerror("Paramètre invalide (Largeur / Longueur Fenêtre)");
+		}
+	;
+
+Details:
+		Variable Options
+	| 	Variable Options Caracteristiques
+	;
+
+Options:
+		PARENTHESE_OUVRANTE Option PARENTHESE_FERMANTE
+	;
+	
+Option:
+		NOMBRE						{ addParameter($1); }
+	|	NOMBRE VIRGULE Option	{ addParameter($1); }
+	;
+
+Caracteristiques:
+		ACCOLADE_OUVRANTE Caracteristique ACCOLADE_FERMANTE
+	|	ACCOLADE_OUVRANTE	COULEUR VIRGULE NOMBRE VIRGULE REMPLISSAGE VIRGULE NOMBRE DEGRE VIRGULE NOMBRE POURCENTAGE ACCOLADE_FERMANTE {
+			setColor($2);
+			setThickness($4);
+			setFilling($6);
+			setRotation($8);
+			setOpacity($11);		
+	}
+	;
+	
+Caracteristique:
+		/*	VIDE	*/
+	|	MOT EGAL COULEUR Caracteristique {
+			if(strcmp($1, "couleur") != 0) yyerror("Paramètre invalide (Couleur)");
+			else setColor($3);
+	}
+	|	MOT EGAL MOT_DIESE NOMBRE VIRGULE NOMBRE VIRGULE NOMBRE Caracteristique {
+			if(strcmp($1, "couleur") != 0) yyerror("Paramètre invalide (Couleur RGB)");
+			else setColor($4, $6, $8);
+	}
+	|	MOT EGAL	REMPLISSAGE Caracteristique {
+			if(strcmp($1, "remplissage") != 0) yyerror("Paramètre invalide (Remplissage)");
+			else setFilling($3);
+	}
+	|	MOT EGAL	NOMBRE POURCENTAGE Caracteristique {
+			if(strcmp($1, "opacite") != 0) yyerror("Paramètre invalide (Opacité)");
+			else setOpacity($3);
+	}
+	|	MOT EGAL NOMBRE DEGRE Caracteristique {
+			if(strcmp($1, "rotation") != 0)
+				yyerror("Paramètre invalide (Rotation)");
+			else setRotation($3);
+	}
+	|	MOT EGAL NOMBRE Caracteristique {
+			if(strcmp($1, "epaisseur") != 0) yyerror("Paramètre invalide (Epaisseur)");
+			else setThickness($3);
+	}
+	;
+
+Variable:
+		/*	VIDE	*/
+	|	VARIABLE	{
+			setVariable($1);
+	}
+%%
+
+void trace(QMainWindow * w){
+	QPalette Pal(QApplication::palette());
+	D = new monDessin();	
+		w->setCentralWidget(D);
+   	w->setMinimumSize(400, 300);
+	yyparse();
+		D->set_figures(figures);
+		D->show_figures();
+	Pal.setColor(QPalette::Background, window_color);		
+	w->setAutoFillBackground(true);
+	w->setPalette(Pal);
+		w->resize(window_width, window_height);
+	D->draw();
+	w->show();
+	return	;
+}
+
+void yyerror(const std::string& mess){
+    std::cout << "A la ligne " << yylineno << " " << mess << std::endl;
+    errors++;
+}

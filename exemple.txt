@@ -1,0 +1,24 @@
+/*	Fichier exemple pour débogage */
+Cercle(200, 200, 100) {
+	couleur = noir
+	remplissage = plein
+	opacite = 70%
+	rotation = 0°
+	epaisseur = 2
+}
+
+Cercle l1(100, 100, 50) {
+	couleur = jaune
+	remplissage = plein
+	opacite = 70%
+	rotation = 0°
+	epaisseur = 2
+}
+
+Cercle l1(300, 100, 50) {
+	couleur = rouge
+	remplissage = plein
+	opacite = 70%
+	rotation = 0°
+	epaisseur = 2
+}

@@ -1,0 +1,70 @@
+//	Propriété de la fenetre
+Fenetre[largeur] = 1800
+Fenetre[hauteur] = 1200
+Fenetre[couleur] = rouge
+
+\*	Dessinons un mickey	*\
+
+Cercle(400, 200, 100) {
+	couleur = noir
+	remplissage = plein
+	opacite = 100%
+	rotation = 0°
+	epaisseur = 2
+}
+
+Cercle(300, 100, 50) {
+	couleur = noir
+	remplissage = plein
+	opacite = 100%
+	rotation = 0°
+	epaisseur = 2
+}
+
+Cercle(500, 100, 50) {
+	couleur = noir
+	remplissage = plein
+	opacite = 100%
+	rotation = 0°
+	epaisseur = 2
+}
+
+Ligne(400,200, 400, 700) {
+	couleur = noir
+	remplissage = plein
+	opacite = 100%
+	rotation = 0°
+	epaisseur = 30
+}
+
+Ligne(400, 350, 600, 275) {
+	couleur = noir
+	remplissage = plein
+	opacite = 100%
+	rotation = 0°
+	epaisseur = 25
+}
+
+Ligne(400,350, 200, 275) {
+	couleur = noir
+	remplissage = plein
+	opacite = 100%
+	rotation = 0°
+	epaisseur = 25
+}
+
+Ligne(400,700, 600, 775) {
+	couleur = noir
+	remplissage = plein
+	opacite = 100%
+	rotation = 0°
+	epaisseur = 25
+}
+
+Ligne(400,700, 200, 775) {
+	couleur = noir
+	remplissage = plein
+	opacite = 100%
+	rotation = 0°
+	epaisseur = 25
+}
