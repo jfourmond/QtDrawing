@@ -1,4 +1,4 @@
-/*	Fichier exemple pour débogage */
+\*	Fichier exemple pour débogage *\
 Cercle(200, 200, 100) {
 	couleur = noir
 	remplissage = plein

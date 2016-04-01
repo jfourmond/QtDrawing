@@ -1,8 +1,8 @@
-Rectangle(10, 15, 20, 25){rouge, 5, plein, 90◦ , 50% }
+Rectangle(10, 15, 20, 25){rouge, 5, plein, 90° , 50% }
 
 CERCLE(1, 1, 50){
 	couleur = vert
-	rotation = 50◦
+	rotation = 50°
 	remplissage = vide
 	epaisseur = 3
 	opacite = 90%
@@ -19,10 +19,13 @@ l1[couleur] = #0, 0, 255
 
 Rectangle r2(160, 160, 10, 10)
 
-r2[couleur] = l1[couleur]
+\*
+	Fonction non implémentée : 
+		r2[couleur] = l1[couleur]
+*\
 
-\\un autre commentaire
+// Un commentaire
 
-Fenetre[longueur] = 1280
+Fenetre[largeur] = 1280
 Fenetre[hauteur] = 1024
 Fenetre[couleur] = blanc

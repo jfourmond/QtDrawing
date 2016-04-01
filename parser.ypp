@@ -384,7 +384,7 @@ Fenetre:
 	|	FENETRE CROCHET_OUVRANT MOT CROCHET_FERMANT EGAL NOMBRE {
 			if(strcmp($3, "largeur") == 0) setWindowWidth($6);
 			else if(strcmp($3, "hauteur") == 0) setWindowHeight($6);
-			else yyerror("Paramètre invalide (Largeur / Longueur Fenêtre)");
+			else yyerror("Paramètre invalide (Largeur / Hauteur Fenêtre)");
 		}
 	;
 
@@ -456,7 +456,6 @@ void trace(QMainWindow * w){
    	w->setMinimumSize(400, 300);
 	yyparse();
 		D->set_figures(figures);
-		D->show_figures();
 	Pal.setColor(QPalette::Background, window_color);		
 	w->setAutoFillBackground(true);
 	w->setPalette(Pal);

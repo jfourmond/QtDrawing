@@ -10,15 +10,15 @@
 	#include "parser.tab.hpp"
 %}
 
-blanc			[ \t]+
-commentaire (\\\*)([^*])*(\*\\)|(\/\/(.*))
+blanc		[ \t]+
+commentaire (\\\*)([^*])*(\*\\)|(\/\/([^(\n)])*)
 
 chiffre		[0-9]
 entier		{chiffre}+
 
 cercle		(c|C)(e|E)(r|R)(c|C)(l|L)(e|E)
 rectangle	(r|R)(e|E)(c|C)(t|T)(a|A)(n|N)(g|G)(l|L)(e|E)
-ligne			(l|L)(i|I)(g|G)(n|N)(e|E)
+ligne		(l|L)(i|I)(g|G)(n|N)(e|E)
 
 couleur		(rouge|vert|bleu|jaune|noir|blanc|gris)
 remplissage	(plein|vide)
@@ -32,7 +32,7 @@ variable		([a-z])([a-z]|[A-Z]|{chiffre})*
 "fin"		return(END);
 
 {blanc}	{	/*	On ignore	*/	}
-[\n]	{ yylineno++; }
+[\n]		{ }
 
 {commentaire} {	/* On ignore */ }
 

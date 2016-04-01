@@ -1691,7 +1691,7 @@ yyreduce:
     {
 			if(strcmp((yyvsp[-3].string), "largeur") == 0) setWindowWidth((yyvsp[0].value));
 			else if(strcmp((yyvsp[-3].string), "hauteur") == 0) setWindowHeight((yyvsp[0].value));
-			else yyerror("Paramètre invalide (Largeur / Longueur Fenêtre)");
+			else yyerror("Paramètre invalide (Largeur / Hauteur Fenêtre)");
 		}
 #line 1697 "parser.tab.cpp" /* yacc.c:1646  */
     break;
@@ -2022,7 +2022,6 @@ void trace(QMainWindow * w){
    	w->setMinimumSize(400, 300);
 	yyparse();
 		D->set_figures(figures);
-		D->show_figures();
 	Pal.setColor(QPalette::Background, window_color);		
 	w->setAutoFillBackground(true);
 	w->setPalette(Pal);

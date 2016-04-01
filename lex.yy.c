@@ -441,7 +441,7 @@ static yyconst flex_int32_t yy_ec[256] =
 
 static yyconst flex_int32_t yy_meta[50] =
     {   0,
-        1,    1,    2,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    2,    1,    1,    2,    2,    1,    1,    1,
         3,    1,    4,    4,    4,    4,    4,    4,    4,    4,
         4,    4,    4,    1,    1,    1,    4,    4,    4,    4,
         4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
@@ -875,7 +875,7 @@ case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
 #line 35 "parser.lex"
-{ yylineno++; }
+{ }
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
