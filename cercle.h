@@ -5,6 +5,10 @@
 
 #include "figure.h"
 
+/**
+ * Classe représentant un cercle disposant de l'attribut particulier :
+ * 	- radius : le rayon du cercle
+ */
 class Cercle : virtual public Figure {
 	private:
 		int radius;

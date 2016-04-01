@@ -5,6 +5,12 @@
 
 #include "figure.h"
 
+/**
+ * Classe représentation une ligne comportant les attributs particuliers :
+ * 	- x_end (Coordonnée X de l'extrémité de la ligne)
+ * 	- y_end (Coordonnée Y de l'extrémité de la ligne)
+ * 
+ */
 class Ligne : virtual public Figure {
 	private:
 		int x_end;

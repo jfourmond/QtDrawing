@@ -5,6 +5,17 @@
 
 #include "remplissage.h"
 
+/**
+ * Classe représentent une Figure.
+ * Une Figure dispose des attributs suivants :
+ * 	- x	(Coordonnée X du point en haut à gauche de la figure (à l'exception du Cercle)
+ * 	- y (Coordonnée Y du point en haut à gauche de la figure (à l'exception du Cercle)
+ * 	- color (Couleur de la Figure)
+ * 	- thickness (Epaisseur du trait de la figure)
+ * 	- filling (Figure plein ou vide)
+ * 	- rotation (Rotation de la figure)
+ * 	- opacity (Opacité de la figure)
+ */
 class Figure {
 	protected:
 		/*	Définitions des coordonnées	*/

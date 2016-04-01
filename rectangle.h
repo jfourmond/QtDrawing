@@ -5,6 +5,11 @@
 
 #include "figure.h"
 
+/**
+ * Classe représentation un rectangle disposant des attributs particuliers :
+ * 	- length (longueur)
+ * 	- width (largeur)
+ */
 class Rectangle : virtual public Figure {
 	private:
 		int length;
