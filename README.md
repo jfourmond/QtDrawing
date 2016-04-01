@@ -21,6 +21,10 @@ Le programme se compile via le fichier [script.sh](https://github.com/jfourmond/
 
 	./script.sh
 	
+Ou en tapant la commande :
+
+	make
+	
 Une fois la compilation effectuée, le programme s'exécute par la commande :
 
 	./Projet\ 2015-2016
